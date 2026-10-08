@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Her Cycle</title>
+    <meta name="description" content="Her Cycle — a caring period & fertility tracker" />
+    <meta name="theme-color" content="#e11d48" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Her Cycle" />
+    <style>
+      html, body { margin: 0; padding: 0; }
+      #loadmsg {
+        position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+        flex-direction: column; gap: 10px; font-family: -apple-system, 'Segoe UI', sans-serif;
+        color: #9d3b53; background: linear-gradient(180deg, #fff7f5 0%, #fdf2f4 100%);
+      }
+      #loadmsg .heart { font-size: 34px; animation: pulse 1.2s ease-in-out infinite; }
+      @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.18); } }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <div id="loadmsg"><span class="heart">💗</span><span>Loading Her Cycle…</span></div>
+    <script type="module">
+      async function b64gz(url) {
+        const t = await (await fetch(url)).text();
+        const bytes = Uint8Array.from(atob(t.replace(/\s+/g, '')), c => c.charCodeAt(0));
+        try {
+          const ds = new DecompressionStream('gzip');
+          return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(ds)).arrayBuffer());
+        } catch (e) { return bytes; }
+      }
+      (async () => {
+        const [cssB, j0, j1, j2, j3, j4, j5] = await Promise.all([
+          b64gz('p/css0.b64'), b64gz('p/js0.b64'), b64gz('p/js1.b64'), b64gz('p/js2.b64'),
+          b64gz('p/js3.b64'), b64gz('p/js4.b64'), b64gz('p/js5.b64'),
+        ]);
+        const dec = new TextDecoder();
+        const style = document.createElement('style');
+        style.textContent = dec.decode(cssB);
+        document.head.appendChild(style);
+        const blob = new Blob([j0, j1, j2, j3, j4, j5], { type: 'text/javascript' });
+        const sc = document.createElement('script');
+        sc.type = 'module';
+        sc.src = URL.createObjectURL(blob);
+        sc.onload = () => { const m = document.getElementById('loadmsg'); if (m) m.remove(); };
+        sc.onerror = () => { document.getElementById('loadmsg').lastElementChild.textContent = 'Failed to load — please refresh.'; };
+        document.body.appendChild(sc);
+      })();
+    </script>
+  </body>
+</html>
